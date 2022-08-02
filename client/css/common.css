@@ -1,0 +1,12 @@
+html,
+body {
+  height: 100%;
+}
+
+.btn-primary {
+  background-color: #00c3f7;
+  border: none;
+}
+.btn-primary:hover {
+  background-color: #00c2f7c1;
+}

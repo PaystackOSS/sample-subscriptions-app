@@ -1,0 +1,25 @@
+body {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  background-color: #f5f5f5;
+}
+
+#signin-form {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+#signin-form .form-control {
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+  font-size: 16px;
+}
+
+#signin-form input[type="email"] {
+  margin-bottom: -1px;
+}
