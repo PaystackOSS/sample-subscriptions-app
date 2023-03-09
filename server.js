@@ -1,45 +1,40 @@
-require("dotenv").config({ path: "../.env" });
-const express = require("express");
-const port = process.env.PORT;
-const { resolve } = require("path");
-const Paystack = require("@paystack/paystack-sdk");
-const crypto = require("crypto");
+require('dotenv').config({ path: './.env' });
+const express = require('express');
+const { resolve } = require('path');
+const Paystack = require('@paystack/paystack-sdk');
+const crypto = require('crypto');
 
 const app = express();
 const paystack = new Paystack(process.env.PAYSTACK_SECRET_KEY);
-const plan_codes = ["PLN_12qw4oagab13zvy", "PLN_yb73itushktdpth"];
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(process.env.STATIC_DIR));
 
-app.get("/", async (req, res) => {
-  const path = resolve(process.env.STATIC_DIR + "/login.html");
+app.get('/', async (req, res) => {
+  const path = resolve(process.env.STATIC_DIR + '/login.html');
   res.sendFile(path);
 });
 
-app.get("/plans", async (req, res) => {
+app.get('/plans', async (req, res) => {
   let fetchPlansResponse = await paystack.plan.list({});
 
   if (fetchPlansResponse.status === false) {
-    console.log("Error fetching plans: ", fetchPlansResponse.message);
+    console.log('Error fetching plans: ', fetchPlansResponse.message);
     return res
       .status(400)
       .send(`Error fetching subscriptions: ${fetchPlansResponse.message}`);
   }
 
-  let plans = fetchPlansResponse.data.filter(
-    (plan) => plan_codes.indexOf(plan.plan_code) !== -1
-  );
-  return res.status(200).send(plans);
+  return res.status(200).send(fetchPlansResponse.data);
 });
 
-app.get("/subscription", async (req, res) => {
+app.get('/subscription', async (req, res) => {
   try {
     let { customer } = req.query;
 
     if (!customer) {
-      throw Error("Please include a valid customer ID");
+      throw Error('Please include a valid customer ID');
     }
 
     let fetchSubscriptionsResponse = await paystack.subscription.list({
@@ -48,7 +43,7 @@ app.get("/subscription", async (req, res) => {
 
     if (fetchSubscriptionsResponse.status === false) {
       console.log(
-        "Error fetching subscriptions: ",
+        'Error fetching subscriptions: ',
         fetchSubscriptionsResponse.message
       );
       return res
@@ -60,9 +55,8 @@ app.get("/subscription", async (req, res) => {
 
     let subscriptions = fetchSubscriptionsResponse.data.filter(
       (subscription) =>
-        (subscription.status === "active" ||
-          subscription.status === "non-renewing") &&
-        plan_codes.indexOf(subscription.plan.plan_code) !== -1
+        subscription.status === 'active' ||
+        subscription.status === 'non-renewing'
     );
 
     return res.status(200).send(subscriptions);
@@ -72,13 +66,13 @@ app.get("/subscription", async (req, res) => {
   }
 });
 
-app.post("/initialize-transaction-with-plan", async (req, res) => {
+app.post('/initialize-transaction-with-plan', async (req, res) => {
   try {
     let { email, amount, plan } = req.body;
 
     if (!email || !amount || !plan) {
       throw Error(
-        "Please provide a valid customer email, amount to charge, and plan code"
+        'Please provide a valid customer email, amount to charge, and plan code'
       );
     }
 
@@ -86,13 +80,13 @@ app.post("/initialize-transaction-with-plan", async (req, res) => {
       email,
       amount,
       plan,
-      channels: ["card"],
-      callback_url: "http://localhost:2426/account.html",
+      channels: ['card'], // limiting the checkout to show card, as it's the only channel that subscriptions are currently available through
+      callback_url: 'http://localhost:5000/account.html',
     });
 
     if (initializeTransactionResponse.status === false) {
       return console.log(
-        "Error initializing transaction: ",
+        'Error initializing transaction: ',
         initializeTransactionResponse.message
       );
     }
@@ -103,12 +97,12 @@ app.post("/initialize-transaction-with-plan", async (req, res) => {
   }
 });
 
-app.post("/create-subscription", async (req, res) => {
+app.post('/create-subscription', async (req, res) => {
   try {
     let { customer, plan, authorization, start_date } = req.body;
 
     if (!customer || !plan) {
-      throw Error("Please provide a valid customer code and plan ID");
+      throw Error('Please provide a valid customer code and plan ID');
     }
 
     let createSubscriptionResponse = await paystack.subscription.create({
@@ -120,7 +114,7 @@ app.post("/create-subscription", async (req, res) => {
 
     if (createSubscriptionResponse.status === false) {
       return console.log(
-        "Error creating subscription: ",
+        'Error creating subscription: ',
         createSubscriptionResponse.message
       );
     }
@@ -131,13 +125,13 @@ app.post("/create-subscription", async (req, res) => {
   }
 });
 
-app.post("/cancel-subscription", async (req, res) => {
+app.post('/cancel-subscription', async (req, res) => {
   try {
     let { code, token } = req.body;
 
     if (!code || !token) {
       throw Error(
-        "Please provide a valid customer code and subscription token"
+        'Please provide a valid customer code and subscription token'
       );
     }
 
@@ -146,25 +140,13 @@ app.post("/cancel-subscription", async (req, res) => {
       token,
     });
 
-    if (disableSubscriptionResponse.status === false) {
-      console.log(
-        "Error disabling subscriptions: ",
-        disableSubscriptionResponse.message
-      );
-      return res
-        .status(400)
-        .send(
-          `Error disabling subscriptions: ${disableSubscriptionResponse.message}`
-        );
-    }
-
-    return res.send("Subscription successfully disabled");
+    return res.send('Subscription successfully disabled');
   } catch (error) {
     return res.status(400).send(error);
   }
 });
 
-app.get("/update-payment-method", async (req, res) => {
+app.get('/update-payment-method', async (req, res) => {
   try {
     const { subscription_code } = req.query;
     const manageSubscriptionLinkResponse =
@@ -172,6 +154,7 @@ app.get("/update-payment-method", async (req, res) => {
         code: subscription_code,
       });
     if (manageSubscriptionLinkResponse.status === false) {
+      console.log(manageSubscriptionLinkResponse.message);
     }
 
     let manageSubscriptionLink = manageSubscriptionLinkResponse.data.link;
@@ -181,12 +164,12 @@ app.get("/update-payment-method", async (req, res) => {
   }
 });
 
-app.post("/create-customer", async (req, res) => {
+app.post('/create-customer', async (req, res) => {
   try {
     let { email } = req.body;
 
     if (!email) {
-      throw Error("Please include a valid email address");
+      throw Error('Please include a valid email address');
     }
 
     let createCustomerResponse = await paystack.customer.create({
@@ -194,14 +177,15 @@ app.post("/create-customer", async (req, res) => {
     });
 
     if (createCustomerResponse.status === false) {
-      console.log("Error creating customer: ", createCustomerResponse.message);
+      console.log('Error creating customer: ', createCustomerResponse.message);
       return res
         .status(400)
         .send(`Error creating customer: ${createCustomerResponse.message}`);
     }
     let customer = createCustomerResponse.data;
+
     // This is where you would save your customer to your DB. Here, we're mocking that by just storing the customer_code in a cookie
-    res.cookie("customer", customer.customer_code);
+    res.cookie('customer', customer.customer_code);
     return res.status(200).send(customer);
   } catch (error) {
     console.log(error);
@@ -210,27 +194,27 @@ app.post("/create-customer", async (req, res) => {
 });
 
 // Handle subscription events sent by Paystack
-app.post("/webhook", async (req, res) => {
+app.post('/webhook', async (req, res) => {
   const hash = crypto
-    .createHmac("sha512", secret)
+    .createHmac('sha512', secret)
     .update(JSON.stringify(req.body))
-    .digest("hex");
-  if (hash == req.headers["x-paystack-signature"]) {
+    .digest('hex');
+  if (hash == req.headers['x-paystack-signature']) {
     const webhook = req.body;
-    res.status(200).send("Webhook received");
+    res.status(200).send('Webhook received');
 
     switch (webhook.event) {
-      case "subscription.create":
-      case "charge.success":
-      case "invoice.update":
-      case "invoice.payment_failed":
-      case "subscription.not_renew":
-      case "subscription.disable":
-      case "subscription.expiring_cards":
+      case 'subscription.create':
+      case 'charge.success':
+      case 'invoice.update':
+      case 'invoice.payment_failed':
+      case 'subscription.not_renew':
+      case 'subscription.disable':
+      case 'subscription.expiring_cards':
     }
   }
 });
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`App running at http://localhost:${process.env.PORT}`);
 });

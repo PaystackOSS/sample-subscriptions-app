@@ -1,6 +1,6 @@
-window.addEventListener("DOMContentLoaded", async () => {
-  const customer_id = window.localStorage.getItem("customer_id");
-  const customer_email = window.localStorage.getItem("customer_email");
+window.addEventListener('DOMContentLoaded', async () => {
+  const customer_id = window.localStorage.getItem('customer_id');
+  const customer_email = window.localStorage.getItem('customer_email');
 
   const subscriptions = await fetch(
     `/subscription?customer=${customer_id}`
@@ -8,13 +8,16 @@ window.addEventListener("DOMContentLoaded", async () => {
   let subscription = subscriptions[0];
 
   if (subscription) {
-    const subscriptionInfoDiv = document.getElementById("subscription-info");
+    const subscriptionInfoDiv = document.getElementById('subscription-info');
     subscriptionInfoDiv.innerHTML = `
       <hr>
       <p>Hi ${customer_email}<p>
       <p>You're currently on the ${subscription.plan.name} plan</p>
       <p>
         Status: ${subscription.status}
+      </p>
+      <p>
+        Subscription Code: ${subscription.subscription_code}
       </p>
       <p>
         Card on file: ${subscription.authorization.brand} card ending in ${
@@ -32,22 +35,22 @@ window.addEventListener("DOMContentLoaded", async () => {
     }" target="_blank"> Manage subscription </a><br />
     `;
   } else {
-    const plans = await fetch("/plans", {
-      method: "get",
+    const plans = await fetch('/plans', {
+      method: 'get',
     })
       .then((res) => res.json())
       .catch((error) => console.log(error));
 
-    let accountDashDiv = document.getElementById("account-dashboard");
+    let accountDashDiv = document.getElementById('account-dashboard');
     accountDashDiv.innerHTML +=
-      "<p>You are currently not on any plan. Select a plan below to subscribe.</p>";
+      '<p>You are currently not on any plan. Select a plan below to subscribe.</p>';
 
-    let selectPlanDiv = document.createElement("div");
-    selectPlanDiv.style.display = "flex";
-    selectPlanDiv.style.flexDirection = "row";
+    let selectPlanDiv = document.createElement('div');
+    selectPlanDiv.style.display = 'flex';
+    selectPlanDiv.style.flexDirection = 'row';
 
     plans.forEach((plan) => {
-      let planDiv = document.createElement("div");
+      let planDiv = document.createElement('div');
       planDiv.innerHTML = `
       <div class="card" style="width: 18rem; margin: 1rem; text-align: center">
       <div class="card-body">
@@ -70,11 +73,11 @@ window.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function signUpForPlan(plan_code) {
-  let email = window.localStorage.getItem("customer_email");
-  let { authorization_url } = await fetch("/initialize-transaction-with-plan", {
-    method: "POST",
+  let email = window.localStorage.getItem('customer_email');
+  let { authorization_url } = await fetch('/initialize-transaction-with-plan', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       email,
