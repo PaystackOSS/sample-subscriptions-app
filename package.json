@@ -1,7 +1,7 @@
 {
-  "name": "server",
+  "name": "Sample Subscriptions App",
   "version": "1.0.0",
-  "description": "",
+  "description": "A sample application showing how to use Paystack's Subscription API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -14,5 +14,8 @@
     "@paystack/paystack-sdk": "^1.0.1",
     "dotenv": "^16.0.1",
     "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.21"
   }
 }

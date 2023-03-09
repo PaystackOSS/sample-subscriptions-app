@@ -5,7 +5,7 @@ This sample application shows how to integrate Paystack's Subscriptions API in y
 
 ## Demo
 
-View a live demo of the app [here](). 
+View a live demo of the app [here](https://codesandbox.io/p/github/PaystackOSS/sample-subscriptions-app/draft/condescending-borg). 
 
 ## Get Started
 
