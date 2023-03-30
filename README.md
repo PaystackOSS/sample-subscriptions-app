@@ -26,10 +26,11 @@ git clone https://github.com/PaystackOSS/sample-subscriptions-app
 npm install
 ```
 
-3. Rename the `.env.example` file to `.env` and add your Paystack secret key. You can also change the default port from 5000 to a port of your choosing:
+3. Rename the `.env.example` file to `.env` and add your Paystack secret key, and your server's URL including the port. This is necessary for the callback URL you'll be redirected to after completing a transaction. You can also change the default port from 5000 to a port of your choosing:
 
 ```
 PAYSTACK_SECRET_KEY=sk_domain_xxxxxx
+SERVER_URL=http://localhost:5000
 ```
 
 4. Start the application

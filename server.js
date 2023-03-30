@@ -81,7 +81,7 @@ app.post('/initialize-transaction-with-plan', async (req, res) => {
       amount,
       plan,
       channels: ['card'], // limiting the checkout to show card, as it's the only channel that subscriptions are currently available through
-      callback_url: 'http://localhost:5000/account.html',
+      callback_url: `${process.env.SERVER_URL}/account.html`,
     });
 
     if (initializeTransactionResponse.status === false) {
